@@ -71,7 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
         textSizeInput.addEventListener('change', (e) => {
             const size = e.target.value;
             textSizeDisplay.textContent = size + 'px';
-            window.engine?.settings.set('textSize', parseInt(size));
+            if (window.engine) {
+                window.engine.settings.set('textSize', parseInt(size));
+            }
         });
     }
 
@@ -82,25 +84,33 @@ document.addEventListener('DOMContentLoaded', () => {
             if (speed < 33) label = 'Slow';
             else if (speed > 66) label = 'Fast';
             textSpeedDisplay.textContent = label;
-            window.engine?.settings.set('textSpeed', parseInt(speed));
+            if (window.engine) {
+                window.engine.settings.set('textSpeed', parseInt(speed));
+            }
         });
     }
 
     if (textColorInput) {
         textColorInput.addEventListener('change', (e) => {
-            window.engine?.settings.set('textColor', e.target.value);
+            if (window.engine) {
+                window.engine.settings.set('textColor', e.target.value);
+            }
         });
     }
 
     if (dialogueAnimationSelect) {
         dialogueAnimationSelect.addEventListener('change', (e) => {
-            window.engine?.settings.set('dialogueAnimation', e.target.value);
+            if (window.engine) {
+                window.engine.settings.set('dialogueAnimation', e.target.value);
+            }
         });
     }
 
     if (musicToggle) {
         musicToggle.addEventListener('change', (e) => {
-            window.engine?.settings.set('backgroundMusic', e.target.checked);
+            if (window.engine) {
+                window.engine.settings.set('backgroundMusic', e.target.checked);
+            }
         });
     }
 });
