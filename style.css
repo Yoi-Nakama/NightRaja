@@ -25,6 +25,7 @@ body {
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 1;
 }
 
 .screen.active {
@@ -32,11 +33,15 @@ body {
 }
 
 .screen.modal {
-    display: flex !important;
+    display: none !important;
     justify-content: center;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.9);
     z-index: 1000;
+}
+
+.screen.modal.active {
+    display: flex !important;
 }
 
 /* Main Menu */
@@ -44,6 +49,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    z-index: 1;
 }
 
 .menu-background {
@@ -129,6 +135,7 @@ body {
     justify-content: center;
     align-items: center;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    z-index: 1;
 }
 
 .creation-content {
@@ -190,6 +197,7 @@ body {
 /* Game Screen */
 #game-screen {
     flex-direction: column;
+    z-index: 1;
 }
 
 .game-background {
@@ -333,7 +341,7 @@ body {
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
-/* Modal */
+/* Modal Content */
 .modal-content {
     background-color: rgba(0, 0, 0, 0.95);
     border: 2px solid #ff4444;
@@ -343,6 +351,8 @@ body {
     width: 90%;
     max-height: 80vh;
     overflow-y: auto;
+    position: relative;
+    z-index: 1001;
 }
 
 .modal-content h2 {
@@ -522,4 +532,4 @@ body {
         width: 95%;
         padding: 1rem;
     }
-      }
+    }
