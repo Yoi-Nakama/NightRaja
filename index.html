@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Night Raja - A Choice-Based Visual Novel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app-container">
+        <!-- Main Menu -->
+        <div id="main-menu" class="screen active">
+            <div class="menu-background">
+                <video autoplay muted loop id="menu-video">
+                    <source src="assets/video/menu-loop.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="menu-content">
+                <h1 class="game-title">NIGHT RAJA</h1>
+                <p class="game-subtitle">A Choice-Based Visual Novel</p>
+                <div class="menu-buttons">
+                    <button class="menu-btn" onclick="startNewGame()">Start Game</button>
+                    <button class="menu-btn" onclick="openLoadGameMenu()">Load Game</button>
+                    <button class="menu-btn" onclick="openSettings()">Settings</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div class="game-background" id="game-background"></div>
+            
+            <div class="game-content">
+                <div class="character-portrait-container">
+                    <img id="character-portrait" class="character-portrait" src="" alt="">
+                </div>
+
+                <div class="dialogue-box">
+                    <div class="speaker-name" id="speaker-name"></div>
+                    <div class="dialogue-text" id="dialogue-text"></div>
+                </div>
+
+                <div class="choices-container" id="choices-container"></div>
+
+                <div class="game-stats">
+                    <div class="stat" id="karma-display">Karma: Neutral</div>
+                    <div class="stat" id="power-stage">Power: Stage 1</div>
+                </div>
+
+                <div class="game-controls">
+                    <button class="control-btn" onclick="openSaveMenu()">Save</button>
+                    <button class="control-btn" onclick="openLoadGameMenu()">Load</button>
+                    <button class="control-btn" onclick="returnToMenu()">Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Character Creation Screen -->
+        <div id="character-creation" class="screen">
+            <div class="creation-content">
+                <h2>Create Your Vampire</h2>
+                <form id="character-form">
+                    <div class="form-group">
+                        <label for="character-name">Character Name:</label>
+                        <input type="text" id="character-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Character Gender:</label>
+                        <div class="gender-options">
+                            <label>
+                                <input type="radio" name="character-gender" value="male"> Male
+                            </label>
+                            <label>
+                                <input type="radio" name="character-gender" value="female"> Female
+                            </label>
+                            <label>
+                                <input type="radio" name="character-gender" value="other"> Other
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="menu-btn">Begin Journey</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Save/Load Menu -->
+        <div id="save-load-menu" class="screen modal">
+            <div class="modal-content">
+                <h2 id="modal-title">Save Game</h2>
+                <div class="save-slots" id="save-slots"></div>
+                <button class="menu-btn" onclick="closeSaveLoadMenu()">Back</button>
+            </div>
+        </div>
+
+        <!-- Settings Menu -->
+        <div id="settings-menu" class="screen modal">
+            <div class="modal-content">
+                <h2>Settings</h2>
+                <div class="settings-group">
+                    <label>Text Size:</label>
+                    <input type="range" id="text-size" min="12" max="20" value="16">
+                    <span id="text-size-display">16px</span>
+                </div>
+                <div class="settings-group">
+                    <label>Text Animation Speed:</label>
+                    <input type="range" id="text-speed" min="0" max="100" value="50">
+                    <span id="text-speed-display">Normal</span>
+                </div>
+                <div class="settings-group">
+                    <label>Text Color:</label>
+                    <input type="color" id="text-color" value="#ffffff">
+                </div>
+                <div class="settings-group">
+                    <label>Dialogue Animation:</label>
+                    <select id="dialogue-animation">
+                        <option value="typewriter">Typewriter</option>
+                        <option value="instant">Instant</option>
+                    </select>
+                </div>
+                <div class="settings-group">
+                    <label>
+                        <input type="checkbox" id="background-music-toggle" checked> Background Music
+                    </label>
+                </div>
+                <button class="menu-btn" onclick="closeSettings()">Back</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="background-music"></audio>
+    
+    <script src="save-system.js"></script>
+    <script src="settings.js"></script>
+    <script src="story.js"></script>
+    <script src="engine.js"></script>
+</body>
+                      </html>
