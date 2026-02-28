@@ -19,9 +19,9 @@
                 <h1 class="game-title">NIGHT RAJA</h1>
                 <p class="game-subtitle">A Choice-Based Visual Novel</p>
                 <div class="menu-buttons">
-                    <button class="menu-btn" onclick="startNewGame()">Start Game</button>
-                    <button class="menu-btn" onclick="openLoadGameMenu()">Load Game</button>
-                    <button class="menu-btn" onclick="openSettings()">Settings</button>
+                    <button class="menu-btn" id="start-btn">Start Game</button>
+                    <button class="menu-btn" id="load-btn">Load Game</button>
+                    <button class="menu-btn" id="settings-btn">Settings</button>
                 </div>
             </div>
         </div>
@@ -48,9 +48,9 @@
                 </div>
 
                 <div class="game-controls">
-                    <button class="control-btn" onclick="openSaveMenu()">Save</button>
-                    <button class="control-btn" onclick="openLoadGameMenu()">Load</button>
-                    <button class="control-btn" onclick="returnToMenu()">Menu</button>
+                    <button class="control-btn" id="save-btn">Save</button>
+                    <button class="control-btn" id="load-game-btn">Load</button>
+                    <button class="control-btn" id="menu-btn">Menu</button>
                 </div>
             </div>
         </div>
@@ -88,7 +88,7 @@
             <div class="modal-content">
                 <h2 id="modal-title">Save Game</h2>
                 <div class="save-slots" id="save-slots"></div>
-                <button class="menu-btn" onclick="closeSaveLoadMenu()">Back</button>
+                <button class="menu-btn" id="close-save-load-btn">Back</button>
             </div>
         </div>
 
@@ -122,7 +122,7 @@
                         <input type="checkbox" id="background-music-toggle" checked> Background Music
                     </label>
                 </div>
-                <button class="menu-btn" onclick="closeSettings()">Back</button>
+                <button class="menu-btn" id="close-settings-btn">Back</button>
             </div>
         </div>
     </div>
@@ -134,4 +134,4 @@
     <script src="story.js"></script>
     <script src="engine.js"></script>
 </body>
-                      </html>
+                                                  </html>
