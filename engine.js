@@ -20,22 +20,16 @@ class NightRajaEngine {
         };
         this.settings = new SettingsManager();
         this.saveSystem = new SaveSystem();
-        this.dialogueIndex = 0;
         this.isAnimating = false;
     }
 
-    /**
-     * Initialize the game
-     */
     init() {
         this.loadSettings();
         this.setupEventListeners();
+        this.applySettings();
         this.showScreen('main-menu');
     }
 
-    /**
-     * Start a new game with character creation
-     */
     startNewGame() {
         this.showScreen('character-creation');
         
@@ -53,17 +47,11 @@ class NightRajaEngine {
         };
     }
 
-    /**
-     * Begin the game after character creation
-     */
     playGame() {
         this.showScreen('game-screen');
         this.playScene(this.gameState.currentScene);
     }
 
-    /**
-     * Play a specific scene
-     */
     playScene(sceneId) {
         const scene = storyData.scenes[sceneId];
         
@@ -76,22 +64,18 @@ class NightRajaEngine {
         this.gameState.visitedScenes.add(sceneId);
         this.gameState.currentScene = sceneId;
         
-        // Set background
         if (scene.background) {
             this.setBackground(scene.background);
         }
 
-        // Display character portrait
         if (scene.character) {
             this.setCharacterPortrait(scene.character);
         } else {
             this.clearCharacterPortrait();
         }
 
-        // Display dialogue
         this.displayDialogue(scene);
 
-        // Display choices
         if (scene.choices) {
             this.displayChoices(scene.choices);
         } else {
@@ -102,25 +86,18 @@ class NightRajaEngine {
             }, 3000);
         }
 
-        // Update stats display
         this.updateStatsDisplay();
 
-        // Play music if provided
         if (scene.music) {
             this.playMusic(scene.music);
         }
     }
 
-    /**
-     * Display dialogue with animation
-     */
     displayDialogue(scene) {
         const speakerName = document.getElementById('speaker-name');
         const dialogueText = document.getElementById('dialogue-text');
         
-        const speaker = scene.speaker || 'Narrator';
-        speakerName.textContent = speaker;
-        
+        speakerName.textContent = scene.speaker || 'Narrator';
         const text = scene.text || '';
         
         if (this.settings.get('dialogueAnimation') === 'typewriter') {
@@ -130,13 +107,10 @@ class NightRajaEngine {
         }
     }
 
-    /**
-     * Typewriter animation effect
-     */
     typewriterEffect(element, text) {
         element.textContent = '';
         let index = 0;
-        const speed = 100 - this.settings.get('textSpeed');
+        const speed = 50 + (100 - this.settings.get('textSpeed'));
         
         const type = () => {
             if (index < text.length) {
@@ -149,9 +123,6 @@ class NightRajaEngine {
         type();
     }
 
-    /**
-     * Display choice buttons
-     */
     displayChoices(choices) {
         const container = document.getElementById('choices-container');
         container.innerHTML = '';
@@ -169,9 +140,6 @@ class NightRajaEngine {
         });
     }
 
-    /**
-     * Handle player choice
-     */
     makeChoice(choice, choiceIndex) {
         if (choice.karma) {
             this.gameState.karma += choice.karma;
@@ -198,36 +166,21 @@ class NightRajaEngine {
         }
     }
 
-    /**
-     * Update power stage based on game progress
-     */
     updatePowerStage() {
-        const visitorCount = this.gameState.visitedScenes.size;
+        const sceneCount = this.gameState.visitedScenes.size;
         
-        if (visitorCount >= 25) {
-            this.gameState.powerStage = Math.min(5, this.gameState.powerStage);
-        } else if (visitorCount >= 20) {
-            this.gameState.powerStage = Math.min(4, this.gameState.powerStage);
-        } else if (visitorCount >= 15) {
-            this.gameState.powerStage = Math.min(3, this.gameState.powerStage);
-        } else if (visitorCount >= 10) {
-            this.gameState.powerStage = Math.min(2, this.gameState.powerStage);
-        }
+        if (sceneCount >= 25) this.gameState.powerStage = Math.min(5, this.gameState.powerStage + 1);
+        else if (sceneCount >= 20) this.gameState.powerStage = Math.min(4, this.gameState.powerStage + 1);
+        else if (sceneCount >= 15) this.gameState.powerStage = Math.min(3, this.gameState.powerStage + 1);
+        else if (sceneCount >= 10) this.gameState.powerStage = Math.min(2, this.gameState.powerStage + 1);
     }
 
-    /**
-     * Unlock a new ability
-     */
     unlockAbility(abilityName) {
         if (!this.gameState.unlockedAbilities.includes(abilityName)) {
             this.gameState.unlockedAbilities.push(abilityName);
-            console.log(`Ability unlocked: ${abilityName}`);
         }
     }
 
-    /**
-     * Update stats display
-     */
     updateStatsDisplay() {
         const karmaDisplay = document.getElementById('karma-display');
         const powerDisplay = document.getElementById('power-stage');
@@ -236,53 +189,38 @@ class NightRajaEngine {
         if (this.gameState.karma > 30) karmaLabel = 'Good';
         else if (this.gameState.karma < -30) karmaLabel = 'Dark';
         
-        karmaDisplay.textContent = `Karma: ${karmaLabel} (${this.gameState.karma})`;
+        karmaDisplay.textContent = `Karma: ${karmaLabel}`;
         powerDisplay.textContent = `Power: Stage ${this.gameState.powerStage}`;
     }
 
-    /**
-     * Set background image
-     */
     setBackground(imagePath) {
         const background = document.getElementById('game-background');
         background.style.backgroundImage = `url('${imagePath}')`;
     }
 
-    /**
-     * Set character portrait
-     */
     setCharacterPortrait(imagePath) {
         const portrait = document.getElementById('character-portrait');
         portrait.src = imagePath;
         portrait.style.display = 'block';
     }
 
-    /**
-     * Clear character portrait
-     */
     clearCharacterPortrait() {
         const portrait = document.getElementById('character-portrait');
         portrait.style.display = 'none';
     }
 
-    /**
-     * Play background music
-     */
     playMusic(musicPath) {
         const audio = document.getElementById('background-music');
         if (this.settings.get('backgroundMusic')) {
             audio.src = musicPath;
             audio.loop = true;
-            audio.play().catch(e => console.log('Audio playback failed:', e));
+            audio.play().catch(e => console.log('Audio playback failed'));
         }
     }
 
-    /**
-     * Show a specific screen
-     */
     showScreen(screenId) {
-        const screens = document.querySelectorAll('.screen');
-        screens.forEach(screen => screen.classList.remove('active'));
+        const allScreens = document.querySelectorAll('.screen');
+        allScreens.forEach(screen => screen.classList.remove('active'));
         
         const screen = document.getElementById(screenId);
         if (screen) {
@@ -290,79 +228,47 @@ class NightRajaEngine {
         }
     }
 
-    /**
-     * Load settings from storage
-     */
     loadSettings() {
         this.settings.load();
-        this.applySettings();
     }
 
-    /**
-     * Apply settings to UI
-     */
     applySettings() {
         const fontSize = this.settings.get('textSize');
-        document.documentElement.style.setProperty('--text-size', `${fontSize}px`);
-        
         const textColor = this.settings.get('textColor');
-        document.documentElement.style.setProperty('--text-color', textColor);
-        
         const dialogueText = document.getElementById('dialogue-text');
+        
         if (dialogueText) {
             dialogueText.style.fontSize = `${fontSize}px`;
             dialogueText.style.color = textColor;
         }
     }
 
-    /**
-     * Setup global event listeners
-     */
     setupEventListeners() {
-        const startBtn = document.getElementById('start-btn');
-        const settingsBtn = document.getElementById('settings-btn');
-        const closeSettingsBtn = document.getElementById('close-settings-btn');
-        const loadBtn = document.getElementById('load-btn');
-        const saveBtn = document.getElementById('save-btn');
-        const loadGameBtn = document.getElementById('load-game-btn');
-        const menuBtn = document.getElementById('menu-btn');
-        const closeSaveLoadBtn = document.getElementById('close-save-load-btn');
-
-        if (startBtn) startBtn.addEventListener('click', () => this.startNewGame());
-        if (settingsBtn) settingsBtn.addEventListener('click', () => this.showScreen('settings-menu'));
-        if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', () => this.showScreen('main-menu'));
-        if (loadBtn) loadBtn.addEventListener('click', () => this.openLoadGame());
-        if (saveBtn) saveBtn.addEventListener('click', () => this.saveSystem.openSaveMenu(this.gameState));
-        if (loadGameBtn) loadGameBtn.addEventListener('click', () => this.openLoadGame());
-        if (menuBtn) menuBtn.addEventListener('click', () => {
-            if (confirm('Return to main menu? Progress will be saved.')) {
+        document.getElementById('start-btn')?.addEventListener('click', () => this.startNewGame());
+        document.getElementById('settings-btn')?.addEventListener('click', () => this.showScreen('settings-menu'));
+        document.getElementById('close-settings-btn')?.addEventListener('click', () => this.showScreen('main-menu'));
+        document.getElementById('load-btn')?.addEventListener('click', () => this.openLoadGame());
+        document.getElementById('save-btn')?.addEventListener('click', () => this.saveSystem.openSaveMenu(this.gameState));
+        document.getElementById('load-game-btn')?.addEventListener('click', () => this.openLoadGame());
+        document.getElementById('menu-btn')?.addEventListener('click', () => {
+            if (confirm('Return to main menu?')) {
                 this.saveSystem.quickSave(this.gameState);
                 this.showScreen('main-menu');
             }
         });
-        if (closeSaveLoadBtn) closeSaveLoadBtn.addEventListener('click', () => this.closeSaveLoadMenu());
+        document.getElementById('close-save-load-btn')?.addEventListener('click', () => this.showScreen('main-menu'));
     }
 
-    /**
-     * Open load game menu
-     */
     openLoadGame() {
         const saves = this.saveSystem.getAllSaves();
         this.saveSystem.displayLoadMenu(saves, (save) => {
             this.gameState = save;
+            this.applySettings();
             this.playGame();
         });
     }
-
-    /**
-     * Close save/load menu
-     */
-    closeSaveLoadMenu() {
-        this.showScreen('main-menu');
-    }
 }
 
-// Initialize engine when page loads
 document.addEventListener('DOMContentLoaded', () => {
     window.engine = new NightRajaEngine();
     window.engine.init();
