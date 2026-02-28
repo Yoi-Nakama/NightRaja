@@ -2,136 +2,417 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Night Raja - A Choice-Based Visual Novel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Night Raja - Visual Novel</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app-container">
-        <!-- Main Menu -->
-        <div id="main-menu" class="screen active">
-            <div class="menu-background">
-                <video autoplay muted loop id="menu-video">
-                    <source src="assets/video/menu-loop.mp4" type="video/mp4">
-                </video>
+
+<!-- ============================================
+     GAME ROOT CONTAINER
+     Main parent wrapper for entire game
+     ============================================ -->
+<div id="game-root" class="game-root">
+
+    <!-- ============================================
+         LAYER 1: BACKGROUND SYSTEM
+         Static images, videos, animated backgrounds
+         ============================================ -->
+    <div id="background-layer" class="background-layer">
+        <div id="background-image" class="background-image"></div>
+        <video id="background-video" class="background-video" muted loop playsinline></video>
+        <canvas id="background-canvas" class="background-canvas"></canvas>
+        <div id="background-overlay" class="background-overlay"></div>
+    </div>
+
+    <!-- ============================================
+         LAYER 2: 3D SCENE LAYER
+         WebGL/Three.js 3D rendering
+         Character models, environments, animations
+         ============================================ -->
+    <div id="scene3d-container" class="scene3d-container">
+        <canvas id="scene3d-canvas" class="scene3d-canvas"></canvas>
+        <div id="scene3d-loading" class="scene3d-loading">
+            <div class="loading-spinner"></div>
+            <p>Loading 3D Scene...</p>
+        </div>
+    </div>
+
+    <!-- ============================================
+         LAYER 3: DIALOGUE AND STORY UI
+         Main visual novel interface
+         ============================================ -->
+    <div id="story-layer" class="story-layer">
+        
+        <!-- Character Portrait/Sprite -->
+        <div id="character-container" class="character-container">
+            <img id="character-portrait" class="character-portrait" src="" alt="">
+            <div id="character-emotion" class="character-emotion"></div>
+        </div>
+
+        <!-- Dialogue Box -->
+        <div id="dialogue-container" class="dialogue-container">
+            <div id="speaker-nameplate" class="speaker-nameplate">
+                <span id="speaker-name"></span>
             </div>
-            <div class="menu-content">
-                <h1 class="game-title">NIGHT RAJA</h1>
-                <p class="game-subtitle">A Choice-Based Visual Novel</p>
-                <div class="menu-buttons">
-                    <button class="menu-btn" id="start-btn">Start Game</button>
-                    <button class="menu-btn" id="load-btn">Load Game</button>
-                    <button class="menu-btn" id="settings-btn">Settings</button>
-                </div>
+            <div id="dialogue-box" class="dialogue-box">
+                <p id="dialogue-text" class="dialogue-text"></p>
+                <div id="dialogue-continue-indicator" class="continue-indicator">▼</div>
             </div>
         </div>
 
-        <!-- Game Screen -->
-        <div id="game-screen" class="screen">
-            <div class="game-background" id="game-background"></div>
-            
-            <div class="game-content">
-                <div class="character-portrait-container">
-                    <img id="character-portrait" class="character-portrait" src="" alt="">
-                </div>
+        <!-- Choice Buttons -->
+        <div id="choices-container" class="choices-container">
+            <!-- Dynamically populated by engine.js -->
+        </div>
 
-                <div class="dialogue-box">
-                    <div class="speaker-name" id="speaker-name"></div>
-                    <div class="dialogue-text" id="dialogue-text"></div>
+        <!-- Game Stats Panel -->
+        <div id="stats-panel" class="stats-panel">
+            <div class="stat-item">
+                <span class="stat-label">Karma</span>
+                <div id="karma-bar" class="stat-bar">
+                    <div id="karma-fill" class="stat-fill"></div>
                 </div>
-
-                <div class="choices-container" id="choices-container"></div>
-
-                <div class="game-stats">
-                    <div class="stat" id="karma-display">Karma: Neutral</div>
-                    <div class="stat" id="power-stage">Power: Stage 1</div>
+                <span id="karma-value" class="stat-value">Neutral</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Power</span>
+                <div id="power-bar" class="stat-bar">
+                    <div id="power-fill" class="stat-fill"></div>
                 </div>
-
-                <div class="game-controls">
-                    <button class="control-btn" id="save-btn">Save</button>
-                    <button class="control-btn" id="load-game-btn">Load</button>
-                    <button class="control-btn" id="menu-btn">Menu</button>
+                <span id="power-value" class="stat-value">Stage 1</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Sun God</span>
+                <div id="sungod-bar" class="stat-bar">
+                    <div id="sungod-fill" class="stat-fill"></div>
                 </div>
+                <span id="sungod-value" class="stat-value">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">North Star</span>
+                <div id="northstar-bar" class="stat-bar">
+                    <div id="northstar-fill" class="stat-fill"></div>
+                </div>
+                <span id="northstar-value" class="stat-value">0</span>
             </div>
         </div>
 
-        <!-- Character Creation Screen -->
-        <div id="character-creation" class="screen">
-            <div class="creation-content">
-                <h2>Create Your Vampire</h2>
-                <form id="character-form">
-                    <div class="form-group">
-                        <label for="character-name">Character Name:</label>
-                        <input type="text" id="character-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Character Gender:</label>
-                        <div class="gender-options">
-                            <label>
-                                <input type="radio" name="character-gender" value="male"> Male
-                            </label>
-                            <label>
-                                <input type="radio" name="character-gender" value="female"> Female
-                            </label>
-                            <label>
-                                <input type="radio" name="character-gender" value="other"> Other
-                            </label>
-                        </div>
-                    </div>
-                    <button type="submit" class="menu-btn">Begin Journey</button>
-                </form>
-            </div>
+        <!-- Control Buttons -->
+        <div id="controls-panel" class="controls-panel">
+            <button id="save-btn" class="control-btn" title="Save Game">
+                <span class="btn-icon">💾</span>
+                <span class="btn-text">Save</span>
+            </button>
+            <button id="load-btn" class="control-btn" title="Load Game">
+                <span class="btn-icon">📂</span>
+                <span class="btn-text">Load</span>
+            </button>
+            <button id="settings-btn" class="control-btn" title="Settings">
+                <span class="btn-icon">⚙️</span>
+                <span class="btn-text">Settings</span>
+            </button>
+            <button id="menu-btn" class="control-btn" title="Return to Menu">
+                <span class="btn-icon">⌂</span>
+                <span class="btn-text">Menu</span>
+            </button>
         </div>
+    </div>
 
-        <!-- Save/Load Menu -->
-        <div id="save-load-menu" class="screen modal">
-            <div class="modal-content">
-                <h2 id="modal-title">Save Game</h2>
-                <div class="save-slots" id="save-slots"></div>
-                <button class="menu-btn" id="close-save-load-btn">Back</button>
-            </div>
+    <!-- ============================================
+         LAYER 4: MAIN MENU SYSTEM
+         Start, Load, Settings options
+         ============================================ -->
+    <div id="main-menu-layer" class="main-menu-layer screen-layer">
+        <div id="menu-background" class="menu-background">
+            <video id="menu-video" class="menu-video" muted autoplay loop playsinline></video>
         </div>
-
-        <!-- Settings Menu -->
-        <div id="settings-menu" class="screen modal">
-            <div class="modal-content">
-                <h2>Settings</h2>
-                <div class="settings-group">
-                    <label>Text Size:</label>
-                    <input type="range" id="text-size" min="12" max="20" value="16">
-                    <span id="text-size-display">16px</span>
-                </div>
-                <div class="settings-group">
-                    <label>Text Animation Speed:</label>
-                    <input type="range" id="text-speed" min="0" max="100" value="50">
-                    <span id="text-speed-display">Normal</span>
-                </div>
-                <div class="settings-group">
-                    <label>Text Color:</label>
-                    <input type="color" id="text-color" value="#ffffff">
-                </div>
-                <div class="settings-group">
-                    <label>Dialogue Animation:</label>
-                    <select id="dialogue-animation">
-                        <option value="typewriter">Typewriter</option>
-                        <option value="instant">Instant</option>
-                    </select>
-                </div>
-                <div class="settings-group">
-                    <label>
-                        <input type="checkbox" id="background-music-toggle" checked> Background Music
-                    </label>
-                </div>
-                <button class="menu-btn" id="close-settings-btn">Back</button>
+        <div id="menu-content" class="menu-content">
+            <div class="menu-title-container">
+                <h1 id="game-title" class="game-title">NIGHT RAJA</h1>
+                <p id="game-subtitle" class="game-subtitle">A Cosmic Vampire Visual Novel</p>
+            </div>
+            <div id="menu-buttons" class="menu-buttons">
+                <button id="start-game-btn" class="menu-btn primary-btn">
+                    <span>▶ Start Game</span>
+                </button>
+                <button id="load-game-btn" class="menu-btn">
+                    <span>📂 Load Game</span>
+                </button>
+                <button id="settings-menu-btn" class="menu-btn">
+                    <span>⚙️ Settings</span>
+                </button>
+                <button id="credits-btn" class="menu-btn secondary-btn">
+                    <span>ℹ️ Credits</span>
+                </button>
+            </div>
+            <div id="version-info" class="version-info">
+                Night Raja v1.0 | Web Edition
             </div>
         </div>
     </div>
 
-    <audio id="background-music"></audio>
-    
-    <script src="save-system.js"></script>
-    <script src="settings.js"></script>
-    <script src="story.js"></script>
-    <script src="engine.js"></script>
+    <!-- ============================================
+         CHARACTER CREATION LAYER
+         Create vampire character
+         ============================================ -->
+    <div id="char-creation-layer" class="screen-layer">
+        <div id="char-creation-content" class="char-creation-content">
+            <h2>Create Your Vampire</h2>
+            <form id="character-form">
+                <div class="form-group">
+                    <label for="char-name">Character Name:</label>
+                    <input type="text" id="char-name" maxlength="20" required>
+                </div>
+                <div class="form-group">
+                    <label>Gender:</label>
+                    <div class="gender-select">
+                        <label class="radio-option">
+                            <input type="radio" name="char-gender" value="male" required>
+                            <span>Male</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="char-gender" value="female">
+                            <span>Female</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="char-gender" value="other">
+                            <span>Non-binary</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Difficulty:</label>
+                    <div class="difficulty-select">
+                        <label class="radio-option">
+                            <input type="radio" name="difficulty" value="easy" required>
+                            <span>Easy</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="difficulty" value="normal" checked>
+                            <span>Normal</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="difficulty" value="hard">
+                            <span>Hard</span>
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="menu-btn primary-btn">Begin Journey</button>
+                <button type="button" class="menu-btn secondary-btn" id="char-creation-back">Back</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================
+         LAYER 5: SAVE/LOAD INTERFACE
+         9 save slots with load/save/delete
+         ============================================ -->
+    <div id="save-load-layer" class="modal-layer screen-layer">
+        <div id="save-load-modal" class="modal-container">
+            <div class="modal-header">
+                <h2 id="save-load-title">Save/Load Game</h2>
+                <button id="save-load-close" class="modal-close">×</button>
+            </div>
+            <div id="save-slots-container" class="save-slots-container">
+                <!-- Dynamically populated by save-system.js -->
+            </div>
+            <div class="modal-footer">
+                <button id="save-load-back" class="menu-btn">← Back</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         LAYER 6: SETTINGS INTERFACE
+         Text customization and audio options
+         ============================================ -->
+    <div id="settings-layer" class="modal-layer screen-layer">
+        <div id="settings-modal" class="modal-container">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button id="settings-close" class="modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h3>Dialogue</h3>
+                    <div class="setting-item">
+                        <label>Text Size</label>
+                        <div class="slider-group">
+                            <input type="range" id="text-size-slider" min="12" max="24" value="16">
+                            <span id="text-size-display">16px</span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label>Text Speed</label>
+                        <div class="slider-group">
+                            <input type="range" id="text-speed-slider" min="0" max="100" value="50">
+                            <span id="text-speed-display">Normal</span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label>Text Color</label>
+                        <input type="color" id="text-color-picker" value="#ffffff">
+                    </div>
+                    <div class="setting-item">
+                        <label>Animation Style</label>
+                        <select id="animation-style-select">
+                            <option value="typewriter">Typewriter</option>
+                            <option value="fade">Fade In</option>
+                            <option value="instant">Instant</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Audio</h3>
+                    <div class="setting-item checkbox">
+                        <input type="checkbox" id="music-toggle" checked>
+                        <label for="music-toggle">Background Music</label>
+                    </div>
+                    <div class="setting-item checkbox">
+                        <input type="checkbox" id="sfx-toggle" checked>
+                        <label for="sfx-toggle">Sound Effects</label>
+                    </div>
+                    <div class="setting-item">
+                        <label>Master Volume</label>
+                        <div class="slider-group">
+                            <input type="range" id="volume-slider" min="0" max="100" value="70">
+                            <span id="volume-display">70%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Graphics</h3>
+                    <div class="setting-item checkbox">
+                        <input type="checkbox" id="effects-toggle" checked>
+                        <label for="effects-toggle">Visual Effects</label>
+                    </div>
+                    <div class="setting-item checkbox">
+                        <input type="checkbox" id="3d-toggle" checked>
+                        <label for="3d-toggle">3D Scenes</label>
+                    </div>
+                    <div class="setting-item">
+                        <label>Brightness</label>
+                        <div class="slider-group">
+                            <input type="range" id="brightness-slider" min="50" max="150" value="100">
+                            <span id="brightness-display">100%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Accessibility</h3>
+                    <div class="setting-item checkbox">
+                        <input type="checkbox" id="screenreader-toggle">
+                        <label for="screenreader-toggle">Screen Reader Mode</label>
+                    </div>
+                    <div class="setting-item checkbox">
+                        <input type="checkbox" id="reduced-motion-toggle">
+                        <label for="reduced-motion-toggle">Reduced Motion</label>
+                    </div>
+                </div>
+
+                <div class="settings-section danger">
+                    <h3>Save Data</h3>
+                    <button id="clear-saves-btn" class="menu-btn secondary-btn">Clear All Saves</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="settings-back" class="menu-btn">← Back</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         LAYER 7: MINI-GAME CONTAINER
+         Combat, puzzles, exploration, etc.
+         ============================================ -->
+    <div id="minigame-layer" class="minigame-layer screen-layer">
+        <div id="minigame-container" class="minigame-container">
+            <!-- Different mini-games render here -->
+            <div id="combat-arena" class="minigame-module combat-module"></div>
+            <div id="puzzle-board" class="minigame-module puzzle-module"></div>
+            <div id="exploration-map" class="minigame-module exploration-module"></div>
+        </div>
+        <div id="minigame-controls" class="minigame-controls">
+            <button id="minigame-exit-btn" class="control-btn">Exit Mini-game</button>
+        </div>
+    </div>
+
+    <!-- ============================================
+         OVERLAY LAYER
+         Fade transitions, screen effects
+         ============================================ -->
+    <div id="overlay-layer" class="overlay-layer">
+        <div id="fade-overlay" class="fade-overlay"></div>
+        <div id="transition-overlay" class="transition-overlay"></div>
+        <div id="notification-container" class="notification-container">
+            <!-- Toast notifications appear here -->
+        </div>
+    </div>
+
+    <!-- ============================================
+         AUDIO ELEMENTS
+         Background music and sound effects
+         ============================================ -->
+    <audio id="background-music" class="audio-element" loop></audio>
+    <audio id="sfx-audio" class="audio-element"></audio>
+    <div id="audio-pool" class="audio-pool">
+        <!-- Multiple audio elements for simultaneous playback -->
+    </div>
+
+</div>
+
+<!-- ============================================
+     SCRIPT LOADING
+     Modular system architecture
+     ============================================ -->
+<script>
+    // Establish global game namespace
+    window.NightRaja = {
+        engine: null,
+        settings: null,
+        saveSystem: null,
+        scene3d: null,
+        minigameSystem: null,
+        uiManager: null,
+    };
+</script>
+
+<!-- Core Modules (Load in order) -->
+<script src="settings.js"></script>
+<script src="save-system.js"></script>
+<script src="uimanager.js"></script>
+<script src="story.js"></script>
+<script src="engine.js"></script>
+
+<!-- Optional 3D Module -->
+<script src="scene3d.js" defer></script>
+
+<!-- Optional Mini-Game Module -->
+<script src="minigame-system.js" defer></script>
+
+<!-- Initialize game on load -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('Night Raja - Initializing...');
+        
+        // Initialize core systems
+        window.NightRaja.settings = new SettingsManager();
+        window.NightRaja.saveSystem = new SaveSystem();
+        window.NightRaja.uiManager = new UIManager();
+        window.NightRaja.engine = new NightRajaEngine();
+        
+        // Start the game
+        window.NightRaja.engine.init();
+        
+        console.log('Night Raja - Ready!');
+    });
+</script>
+
 </body>
-                                                  </html>
+</html>
