@@ -10,7 +10,7 @@ class NightRajaEngine {
             playerName: '',
             playerGender: '',
             currentScene: 'intro',
-            karma: 0, // -100 (Dark) to +100 (Good)
+            karma: 0,
             sunGodMeter: 0,
             northStarMeter: 0,
             powerStage: 1,
@@ -38,7 +38,9 @@ class NightRajaEngine {
      */
     startNewGame() {
         this.showScreen('character-creation');
-        document.getElementById('character-form').addEventListener('submit', (e) => {
+        
+        const form = document.getElementById('character-form');
+        form.onsubmit = (e) => {
             e.preventDefault();
             const name = document.getElementById('character-name').value;
             const gender = document.querySelector('input[name="character-gender"]:checked').value;
@@ -48,7 +50,7 @@ class NightRajaEngine {
             this.gameState.currentScene = 'intro_start';
             
             this.playGame();
-        });
+        };
     }
 
     /**
@@ -93,7 +95,6 @@ class NightRajaEngine {
         if (scene.choices) {
             this.displayChoices(scene.choices);
         } else {
-            // Auto-advance if no choices
             setTimeout(() => {
                 if (scene.next) {
                     this.playScene(scene.next);
@@ -172,13 +173,11 @@ class NightRajaEngine {
      * Handle player choice
      */
     makeChoice(choice, choiceIndex) {
-        // Update karma if applicable
         if (choice.karma) {
             this.gameState.karma += choice.karma;
             this.gameState.karma = Math.max(-100, Math.min(100, this.gameState.karma));
         }
 
-        // Update divine meters
         if (choice.sunGod) {
             this.gameState.sunGodMeter += choice.sunGod;
         }
@@ -186,18 +185,14 @@ class NightRajaEngine {
             this.gameState.northStarMeter += choice.northStar;
         }
 
-        // Store the choice made
         this.gameState.choices[this.currentSceneId] = choiceIndex;
 
-        // Unlock abilities if applicable
         if (choice.unlocksAbility) {
             this.unlockAbility(choice.unlocksAbility);
         }
 
-        // Update power stage based on conditions
         this.updatePowerStage();
 
-        // Navigate to next scene
         if (choice.nextScene) {
             this.playScene(choice.nextScene);
         }
@@ -324,18 +319,28 @@ class NightRajaEngine {
      * Setup global event listeners
      */
     setupEventListeners() {
-        // Menu buttons
-        window.startNewGame = () => this.startNewGame();
-        window.openSettings = () => this.showScreen('settings-menu');
-        window.closeSettings = () => this.showScreen('main-menu');
-        window.openLoadGameMenu = () => this.openLoadGame();
-        window.openSaveMenu = () => this.saveSystem.openSaveMenu(this.gameState);
-        window.returnToMenu = () => {
+        const startBtn = document.getElementById('start-btn');
+        const settingsBtn = document.getElementById('settings-btn');
+        const closeSettingsBtn = document.getElementById('close-settings-btn');
+        const loadBtn = document.getElementById('load-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const loadGameBtn = document.getElementById('load-game-btn');
+        const menuBtn = document.getElementById('menu-btn');
+        const closeSaveLoadBtn = document.getElementById('close-save-load-btn');
+
+        if (startBtn) startBtn.addEventListener('click', () => this.startNewGame());
+        if (settingsBtn) settingsBtn.addEventListener('click', () => this.showScreen('settings-menu'));
+        if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', () => this.showScreen('main-menu'));
+        if (loadBtn) loadBtn.addEventListener('click', () => this.openLoadGame());
+        if (saveBtn) saveBtn.addEventListener('click', () => this.saveSystem.openSaveMenu(this.gameState));
+        if (loadGameBtn) loadGameBtn.addEventListener('click', () => this.openLoadGame());
+        if (menuBtn) menuBtn.addEventListener('click', () => {
             if (confirm('Return to main menu? Progress will be saved.')) {
                 this.saveSystem.quickSave(this.gameState);
                 this.showScreen('main-menu');
             }
-        };
+        });
+        if (closeSaveLoadBtn) closeSaveLoadBtn.addEventListener('click', () => this.closeSaveLoadMenu());
     }
 
     /**
@@ -347,6 +352,13 @@ class NightRajaEngine {
             this.gameState = save;
             this.playGame();
         });
+    }
+
+    /**
+     * Close save/load menu
+     */
+    closeSaveLoadMenu() {
+        this.showScreen('main-menu');
     }
 }
 
