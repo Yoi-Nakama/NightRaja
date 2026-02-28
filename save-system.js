@@ -43,7 +43,7 @@ class SaveSystem {
      * Quick save to auto slot
      */
     quickSave(gameState) {
-        this.save(gameState, this.maxSaves); // Use last slot for auto-save
+        this.save(gameState, this.maxSaves);
     }
 
     /**
@@ -116,26 +116,29 @@ class SaveSystem {
                         <div>${save.currentScene}</div>
                         <div>${new Date(save.timestamp).toLocaleDateString()}</div>
                     </div>
-                    <button onclick="window.engine.saveSystem.delete(${i}); window.engine.saveSystem.openSaveMenu(window.engine.gameState)">Delete</button>
                 `;
+                slot.addEventListener('click', () => {
+                    this.save(gameState, i);
+                    alert(`Game saved to slot ${i}`);
+                    window.engine.closeSaveLoadMenu();
+                });
             } else {
                 slot.classList.add('empty');
                 slot.innerHTML = `
                     <div class="save-slot-number">Slot ${i}</div>
                     <div class="save-slot-info">Empty</div>
                 `;
+                slot.addEventListener('click', () => {
+                    this.save(gameState, i);
+                    alert(`Game saved to slot ${i}`);
+                    window.engine.closeSaveLoadMenu();
+                });
             }
-
-            slot.addEventListener('click', () => {
-                this.save(gameState, i);
-                alert(`Game saved to slot ${i}`);
-                this.closeSaveLoadMenu();
-            });
 
             container.appendChild(slot);
         }
 
-        document.getElementById('save-load-menu').classList.add('active');
+        window.engine.showScreen('save-load-menu');
     }
 
     /**
@@ -164,7 +167,7 @@ class SaveSystem {
                 slot.addEventListener('click', () => {
                     const loadedState = this.load(i);
                     callback(loadedState);
-                    this.closeSaveLoadMenu();
+                    window.engine.showScreen('game-screen');
                 });
             } else {
                 slot.classList.add('empty');
@@ -177,17 +180,6 @@ class SaveSystem {
             container.appendChild(slot);
         }
 
-        document.getElementById('save-load-menu').classList.add('active');
+        window.engine.showScreen('save-load-menu');
     }
-
-    /**
-     * Close save/load menu
-     */
-    closeSaveLoadMenu() {
-        document.getElementById('save-load-menu').classList.remove('active');
-    }
-}
-
-window.closeSaveLoadMenu = () => {
-    document.getElementById('save-load-menu').classList.remove('active');
-};
+            }
